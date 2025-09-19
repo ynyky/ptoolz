@@ -1,0 +1,37 @@
+#!/bin/bash
+set -e
+
+script_path=`realpath "$0"`
+#echo $script_path
+bin_path=`dirname "$script_path"`
+#echo $bin_path
+prj_dir=`realpath "$bin_path/../"`
+echo $bin_path
+tag=`date +%Y_%m_%dT%H_%M_00Z`
+
+prj_file="$prj_dir/config/project.json"
+
+repo=`jq -r ".docker.repo" "$prj_file"`
+project=`jq -r ".docker.dev.name" "$prj_file"`
+version=`jq -r ".docker.dev.version" "$prj_file"`
+dev_version=`jq -r ".version" "$prj_file"`
+
+ACTION=${1:-local}
+case "$ACTION" in
+  "local" )
+    #$prj_dir/hooks/pre_repo.sh
+    docker build -t $repo/$project:latest $prj_dir --build-arg DEV_ENV_VERSION_ARG=$dev_version --target code --progress plain
+    echo "built $repo/$project:latest"
+    ;;
+  "release" )
+    #$prj_dir/hooks/pre_repo.sh
+    docker build -t $repo/$project:latest $prj_dir --build-arg DEV_ENV_VERSION_ARG=$dev_version --target code --progress plain
+#    docker push $repo/$project:latest
+    docker tag $repo/$project:latest $repo/$project:$tag
+#    docker push $repo/$project:$VERSION-$tag
+    echo "Pushed $project, Tag: $tag"
+    ;;
+  * )
+    echo "unknown action: '$ACTION'"
+  ;;
+esac

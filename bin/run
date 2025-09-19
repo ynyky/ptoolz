@@ -1,0 +1,106 @@
+#!/bin/bash
+# dependencies:
+
+set -ex
+CMD=$@
+
+if [[ -z "$@" ]]; then
+ CMD="/bin/bash"
+fi
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+APP_DIR=$(readlink -f "$DIR/..") # directory of dev_env
+PRJ_DIR=$(readlink -f "$DIR/../") # direcory of the projects
+PRJ_FILE="$PRJ_DIR/config/project.json"
+
+repo=`jq -r ".docker.repo" "$PRJ_FILE"`
+project=`jq -r ".docker.dev.name" "$PRJ_FILE"`
+version=`jq -r ".docker.dev.version" "$PRJ_FILE"`
+tag=`jq -r ".docker.dev.tag" "$PRJ_FILE"`
+bind_ip=`jq -r ".kind.panel.ip" "$PRJ_FILE"`
+dev_domain=`jq -r ".ptoolz.domain" "$PRJ_FILE"`
+persisted=`jq -r ".docker.dev.persisted" "$PRJ_FILE"`
+if command -v gpgconf > /dev/null; then
+  GPG_SOCKET_MOUNT="-v `gpgconf --list-dir socketdir`:/run/user/1000/gnupg"
+fi
+
+if [[ "$persisted" == "false" ]]; then
+  if [[ "$(docker images -q $repo/$project:$tag)" == "" ]]; then
+    echo "Image is not built, please build it first. (run bin/build)";
+    exit 1;
+  fi
+fi
+
+if ! ip a show dev lo | grep -q "$bind_ip"; then
+    # Add the KIND panel IP to loopback only if it is not already there
+
+    #TODO: remove hardcoded device
+    sudo ip a add $bind_ip dev lo
+fi
+
+if [[ ! -O /var/run/docker.sock ]]; then
+    # Change the owner of the Docker socket to the current user if it is not already owned by the current user
+    sudo chown $UID /var/run/docker.sock
+fi
+
+if command -v xhost; then
+    # Run only if the xhost command exists
+    xhost +local:root || true> /dev/null
+fi
+
+echo "Your LB will be reachable on: https://$bind_ip"
+echo "or                            https://$dev_domain"
+
+PTOOLZ_NAME=`jq -r ".name" "$PRJ_FILE"`
+VERSION=${VERSION:-$tag}
+PTOLLZ_DIR=$PRJ_DIR
+
+if [ -f $PRJ_DIR/me/env ]; then
+  ENV_FILE="--env-file $PRJ_DIR/me/env"
+fi
+
+ACTION=${1:-run}
+
+case "$ACTION" in
+  "update" )
+    #$HOST_PTOLLZ_DIR/hooks/pre_repo.sh
+    docker pull $repo/$project:$VERSION
+    ;;
+  "build" )
+    #$PRJ_DIR/hooks/pre_repo.sh
+    docker build -t $repo/$project:latest $APP_DIR
+    docker tag $repo/$project:latest $repo/$project:$VERSION
+    ;;
+  "release" )
+    #$PRJ_DIR/hooks/pre_repo.sh
+    docker build -t $repo/$project:latest $APP_DIR
+    docker push $repo/$project:latest
+    docker tag $repo/$project:latest $repo/$project:$2
+    docker push $repo/$project:$2
+    echo "Pushed $project, Tag: $2"
+    ;;
+  * )
+    #$PRJ_DIR/hooks/pre_repo.sh
+
+
+    DOCKER_CMD="docker run -ti --rm  --network host \
+    -e VERSION=$VERSION \
+    -e PTOLLZ_DIR=$PTOLLZ_DIR \
+    -e HELM_HOME=$PTOLLZ_DIR/me/helm \
+    -e KUBECONFIG=$PTOLLZ_DIR/me/kube/config \
+    -e DISPLAY=":0" \
+    -e HOME=$HOME \
+    -e KUBE_CONFIG_PATH=$PTOLLZ_DIR/me/kube/config \
+    $ENV_FILE \
+    $DEV_VOLUME \
+    $GPG_SOCKET_MOUNT \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    --workdir $PTOLLZ_DIR \
+    -u dev \
+    --device=/dev/kvm \
+    --group-add $(getent group kvm | cut -d: -f3) \
+    $repo/$project:$VERSION $CMD"
+    echo $DOCKER_CMD
+    exec $DOCKER_CMD
+    ;;
+esac

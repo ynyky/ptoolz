@@ -1,0 +1,29 @@
+{
+  "name": "ptoolz",
+  "path": "work/ptoolz",
+  "version": "0.1.0",
+  "git_base": "github.com/ynyky",
+  "docker": {
+    "provider": "docker",
+    "repo": "docker.io/ynyky",
+    "dev": {
+      "name": "ptoolz",
+      "version": "v1",
+      "tag": "latest",
+      "persisted": true
+    }
+  },
+  "ptoolz": {
+    "logging_level": "warn",
+    "domain": "dev.example.com"
+  },
+  "kind": {
+    "panel": {
+      "ip": "192.168.90.11"
+    },
+    "network": {
+      "mask": "192.168.91.0/24",
+      "gateway": "192.168.91.1"
+    }
+  }
+}
