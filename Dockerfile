@@ -177,6 +177,20 @@ RUN curl -fsSL https://releases.hashicorp.com/packer/1.11.2/packer_1.11.2_linux_
 #OCI 
 RUN echo "[global]\nbreak-system-packages = true" > /etc/pip.conf && \
     pip install oci-cli==3.64.1
+#GO
+ENV GO_VERSION=1.25.1
+
+RUN curl --silent --location "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" \
+    -o /tmp/go.tar.gz && \
+    tar -C /usr/local -xzf /tmp/go.tar.gz && \
+    rm /tmp/go.tar.gz
+ENV PATH=$PATH:/usr/local/go/bin
+ENV GOPATH=/home/dev/go
+ENV PATH=$PATH:$GOPATH/bin
+
+RUN go install github.com/x-motemen/gore/cmd/gore@latest
+ENV GOCACHE=/tmp/.gocache
+
 
 # Add user to use kernel feature
 RUN usermod -aG kvm dev
@@ -210,7 +224,7 @@ RUN chown -R dev:dev /home/dev
 WORKDIR $PTOOLZ_PATH
 RUN chown -R dev:dev ./
 USER dev
-#ENTRYPOINT [ "/bin/sh" ]
+#ENTRYPOINT [ "/bin/bash" ]
 
 # ARG DEV_ENV_VERSION_ARG
 # ENV MINFRA_DEV_ENV_VERSION=${DEV_ENV_VERSION_ARG}
