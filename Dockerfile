@@ -180,15 +180,15 @@ RUN echo "[global]\nbreak-system-packages = true" > /etc/pip.conf && \
 #GO
 ENV GO_VERSION=1.25.1
 
-RUN curl --silent --location "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" \
-    -o /tmp/go.tar.gz && \
-    tar -C /usr/local -xzf /tmp/go.tar.gz && \
+RUN curl --silent --location "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz && \
+    sudo tar -C /usr/local -xzf /tmp/go.tar.gz && \
     rm /tmp/go.tar.gz
 ENV PATH=$PATH:/usr/local/go/bin
 ENV GOPATH=/home/dev/go
 ENV PATH=$PATH:$GOPATH/bin
 
 RUN go install github.com/x-motemen/gore/cmd/gore@latest
+RUN go install golang.org/x/tools/gopls@latest
 ENV GOCACHE=/tmp/.gocache
 
 
