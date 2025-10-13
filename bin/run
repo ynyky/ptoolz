@@ -91,11 +91,15 @@ case "$ACTION" in
     -e DISPLAY=":0" \
     -e HOME=$HOME \
     -e KUBE_CONFIG_PATH=$PTOLLZ_DIR/me/kube/config \
+    -e SSH_AUTH_SOCK=/ssh-agent \
     $ENV_FILE \
     $DEV_VOLUME \
     $GPG_SOCKET_MOUNT \
+    -v $SSH_AUTH_SOCK:/ssh-agent \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /usr/local:/usr/local \
+    -v /home/$USER:/home/$USER \
+    -v /home/$USER/projects/ptoolz:/home/$USER/projects/ptoolz \
     --workdir $PTOLLZ_DIR \
     -u dev \
     --device=/dev/kvm \
