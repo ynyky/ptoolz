@@ -97,7 +97,6 @@ case "$ACTION" in
     $GPG_SOCKET_MOUNT \
     -v $SSH_AUTH_SOCK:/ssh-agent \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v /usr/local:/usr/local \
     -v /home/$USER:/home/$USER \
     -v /home/$USER/projects/ptoolz:/home/$USER/projects/ptoolz \
     --workdir $PTOLLZ_DIR \
