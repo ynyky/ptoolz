@@ -115,6 +115,8 @@ RUN go install github.com/x-motemen/gore/cmd/gore@latest && \
 
 # Add dev user to KVM group
 RUN usermod -aG kvm dev
+ADD requirements/python-requirements.txt /tmp/python-requirements.txt
+RUN pip install -r /tmp/python-requirements.txt
 
 # Set working directory
 RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH
