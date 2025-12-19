@@ -60,7 +60,7 @@ ENV KUBECTL_VERSION=1.23.1
 RUN curl -fsSL "https://dl.k8s.io/release/v$KUBECTL_VERSION/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 # K9s
-ENV K9S_VERSION=0.32.5
+ENV K9S_VERSION=0.50.16
 RUN curl -fsSL "https://github.com/derailed/k9s/releases/download/v$K9S_VERSION/k9s_linux_amd64.deb" -o /tmp/k9s.deb && \
     dpkg -i /tmp/k9s.deb && rm /tmp/k9s.deb
 
