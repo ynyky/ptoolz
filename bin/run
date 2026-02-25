@@ -53,7 +53,7 @@ echo "or                            https://$dev_domain"
 
 PTOOLZ_NAME=`jq -r ".name" "$PRJ_FILE"`
 VERSION=${VERSION:-$tag}
-PTOLLZ_DIR=$PRJ_DIR
+PTOOLZ_DIR=$PRJ_DIR
 
 if [ -f $PRJ_DIR/me/env ]; then
   ENV_FILE="--env-file $PRJ_DIR/me/env"
@@ -63,7 +63,7 @@ ACTION=${1:-run}
 
 case "$ACTION" in
   "update" )
-    #$HOST_PTOLLZ_DIR/hooks/pre_repo.sh
+    #$HOST_PTOOLZ_DIR/hooks/pre_repo.sh
     docker pull $repo/$project:$VERSION
     ;;
   "build" )
@@ -85,12 +85,12 @@ case "$ACTION" in
 
     DOCKER_CMD="docker run -ti --rm  --network host \
     -e VERSION=$VERSION \
-    -e PTOLLZ_DIR=$PTOLLZ_DIR \
-    -e HELM_HOME=$PTOLLZ_DIR/me/helm \
-    -e KUBECONFIG=$PTOLLZ_DIR/me/kube/config \
+    -e PTOOLZ_DIR=$PTOOLZ_DIR \
+    -e HELM_HOME=$PTOOLZ_DIR/me/helm \
+    -e KUBECONFIG=$PTOOLZ_DIR/me/kube/config \
     -e DISPLAY=":0" \
     -e HOME=$HOME \
-    -e KUBE_CONFIG_PATH=$PTOLLZ_DIR/me/kube/config \
+    -e KUBE_CONFIG_PATH=$PTOOLZ_DIR/me/kube/config \
     -e SSH_AUTH_SOCK=/ssh-agent \
     $ENV_FILE \
     $DEV_VOLUME \
@@ -99,7 +99,7 @@ case "$ACTION" in
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /home/$USER:/home/$USER \
     -v /home/$USER/projects/ptoolz:/home/$USER/projects/ptoolz \
-    --workdir $PTOLLZ_DIR \
+    --workdir $PTOOLZ_DIR \
     -u dev \
     --device=/dev/kvm \
     --group-add $(getent group kvm | cut -d: -f3) \

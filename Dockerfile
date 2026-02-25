@@ -120,8 +120,16 @@ RUN usermod -aG kvm dev
 ADD requirements/python-requirements.txt /tmp/python-requirements.txt
 RUN pip install -r /tmp/python-requirements.txt
 
+# neovim
+RUN curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+RUN rm -rf /opt/nvim-linux-x86_64
+RUN tar -C /opt -xzf nvim-linux-x86_64.tar.gz
+RUN mkdir -p /opt/nvim-config/lazy
+RUN git clone https://github.com/folke/lazy.nvim.git \
+  /opt/nvim-config/lazy/lazy.nvim
+RUN chown -R dev:dev /opt/nvim-config
 # Set working directory
 RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH
 USER dev
-ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$GOPATH/bin:$PATH
+ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$GOPATH/bin:/opt/nvim-linux-x86_64/bin:$PATH
 WORKDIR $PTOOLZ_PATH
