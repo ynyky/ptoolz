@@ -1,4 +1,3 @@
--- Add lazy to runtime
 vim.opt.rtp:prepend("/opt/nvim-config/lazy/lazy.nvim")
 
 require("lazy").setup({
@@ -12,10 +11,7 @@ require("lazy").setup({
     end,
   },
 
-  -- 🌈 Icons
-  { "nvim-tree/nvim-web-devicons" },
-
-  -- 🔍 Telescope (Prettier)
+  -- 🔍 Telescope
   {
     "nvim-telescope/telescope.nvim",
     dependencies = { "nvim-lua/plenary.nvim" },
@@ -29,29 +25,31 @@ require("lazy").setup({
             preview_width = 0.6,
           },
           border = true,
-          winblend = 0,
         },
       })
     end,
   },
 
-  -- 📁 Neo-tree (Cleaner Sidebar)
+  -- 📁 Neo-tree (NO ICONS)
   {
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v3.x",
     dependencies = {
       "nvim-lua/plenary.nvim",
-      "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
     config = function()
       require("neo-tree").setup({
         close_if_last_window = true,
-        popup_border_style = "rounded",
-        enable_git_status = true,
-        enable_diagnostics = true,
+        enable_git_status = false,
+        enable_diagnostics = false,
         window = {
           width = 30,
+        },
+        default_component_configs = {
+          icon = {
+            enabled = false,
+          },
         },
         filesystem = {
           filtered_items = {
@@ -66,18 +64,20 @@ require("lazy").setup({
   -- 🧼 Statusline
   {
     "nvim-lualine/lualine.nvim",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lualine").setup({
         options = {
           theme = "tokyonight",
           section_separators = "",
           component_separators = "",
+          icons_enabled = false,
         },
       })
     end,
   },
-    {
+
+  -- 🖥 Terminal
+  {
     "akinsho/toggleterm.nvim",
     version = "*",
     config = function()
@@ -85,7 +85,7 @@ require("lazy").setup({
         size = 15,
         open_mapping = [[<C-t>]],
         direction = "horizontal",
-     --   shell = "bash -l -i -c 'source /home/michal/projects/ccs/config/env_setup; exec bash -l -i'",
+        shell = "bash -l -i",
       })
     end,
   }
