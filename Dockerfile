@@ -130,7 +130,7 @@ RUN git clone https://github.com/folke/lazy.nvim.git \
   /opt/nvim-config/lazy/lazy.nvim
 RUN chown -R dev:dev /opt/nvim-config
 # Set working directory
-RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH && chown -R dev:dev $GOPATH
+RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH && chown -R dev:dev $GOPATH && chown -R dev:dev $GOCACHE
 USER dev
 ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$GOPATH/bin:/opt/nvim-linux-x86_64/bin:$PATH
 WORKDIR $PTOOLZ_PATH
