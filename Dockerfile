@@ -6,7 +6,8 @@ ENV LANG=C.UTF-8 \
     LC_ALL=C.UTF-8 \
     PTOOLZ_PATH=/home/dev/ptoolz \
     GOPATH=/home/dev/go \
-    GOCACHE=/tmp/.gocache
+    GOCACHE=/tmp/.gocache \
+    GOMODCACHE=/home/dev/go/pkg/mod
 
 ENV PATH=$PATH:/usr/local/go/bin:/home/dev/go/bin
 
@@ -82,7 +83,7 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
     apt-get update && apt-get install -y terraform
 
 # Trivy
-ENV TRIVY_VERSION=0.69.1
+ENV TRIVY_VERSION=0.69.3
 RUN curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.deb" -o trivy.deb && \
     dpkg -i trivy.deb && rm trivy.deb
 
@@ -129,7 +130,7 @@ RUN git clone https://github.com/folke/lazy.nvim.git \
   /opt/nvim-config/lazy/lazy.nvim
 RUN chown -R dev:dev /opt/nvim-config
 # Set working directory
-RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH
+RUN mkdir -p $PTOOLZ_PATH && chown -R dev:dev $PTOOLZ_PATH && chown -R dev:dev $GOPATH
 USER dev
 ENV PATH=/usr/local/bin:/usr/local/sbin:/usr/local/go/bin:$GOPATH/bin:/opt/nvim-linux-x86_64/bin:$PATH
 WORKDIR $PTOOLZ_PATH
