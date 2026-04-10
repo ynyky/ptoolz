@@ -3,13 +3,13 @@ vim.opt.rtp:prepend("/opt/nvim-config/lazy/lazy.nvim")
 require("lazy").setup({
 
   -- 🎨 Colorscheme
-  {
-    "folke/tokyonight.nvim",
-    priority = 1000,
-    config = function()
-      vim.cmd("colorscheme tokyonight")
-    end,
-  },
+  -- {
+  --   "folke/tokyonight.nvim",
+  --   priority = 1000,
+  --   config = function()
+  --     vim.cmd("colorscheme tokyonight")
+  --   end,
+  -- },
 
   -- 🔍 Telescope
   {
