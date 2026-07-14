@@ -78,9 +78,11 @@ RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWS_CLI_VE
 
 # Terraform
 ENV TERRAFORM_VERSION=1.14.5
-RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - && \
-    apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main" && \
-    apt-get update && apt-get install -y terraform
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /etc/apt/keyrings/hashicorp.gpg && \
+    chmod a+r /etc/apt/keyrings/hashicorp.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list && \
+    apt-get update && apt-get install -y terraform && \
+    rm -rf /var/lib/apt/lists/*
 
 # Trivy
 ENV TRIVY_VERSION=0.69.3
