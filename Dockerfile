@@ -72,9 +72,15 @@ ENV KIND_VERSION=0.31.0
 RUN curl -fsSL "https://github.com/kubernetes-sigs/kind/releases/download/v$KIND_VERSION/kind-linux-amd64" -o /usr/local/bin/kind && chmod +x /usr/local/bin/kind
 
 # AWS CLI v2
-ENV AWS_CLI_VERSION=2.33.20
+ENV AWS_CLI_VERSION=2.37.9
 RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWS_CLI_VERSION.zip" -o awscliv2.zip && \
     unzip awscliv2.zip && ./aws/install && rm -rf aws awscliv2.zip
+
+# AWS Session Manager plugin (needed for `aws ssm start-session`)
+ENV SSM_PLUGIN_VERSION=1.2.835.0
+RUN curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/$SSM_PLUGIN_VERSION/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/session-manager-plugin.deb && \
+    dpkg -i /tmp/session-manager-plugin.deb && rm /tmp/session-manager-plugin.deb && \
+    session-manager-plugin --version
 
 # Terraform
 ENV TERRAFORM_VERSION=1.14.5
@@ -94,8 +100,12 @@ ENV EKSCTL_VERSION=0.222.0
 RUN curl -fsSL "https://github.com/weaveworks/eksctl/releases/download/v$EKSCTL_VERSION/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/local/bin/
 
-# MinIO client
-RUN curl -fsSL "https://dl.min.io/client/mc/release/linux-amd64/mc" -o /usr/local/bin/mc && chmod +x /usr/local/bin/mc
+# MinIO client (dl.min.io community builds are gone; mc repo is archived, use final GitHub release)
+ENV MC_VERSION=RELEASE.2025-08-13T08-35-41Z
+ENV MC_SHA256=01f866e9c5f9b87c2b09116fa5d7c06695b106242d829a8bb32990c00312e891
+RUN curl -fsSL "https://github.com/minio/mc/releases/download/$MC_VERSION/mc.linux-amd64.$MC_VERSION" -o /usr/local/bin/mc && \
+    echo "$MC_SHA256  /usr/local/bin/mc" | sha256sum -c - && \
+    chmod +x /usr/local/bin/mc
 
 # GLAB
 ENV GLAB_VERSION=1.31.0
