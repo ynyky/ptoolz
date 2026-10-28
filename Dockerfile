@@ -1,4 +1,4 @@
-FROM python:3.13.7-bookworm AS code
+FROM python:3.13.18-bookworm AS code
 
 # Set locale
 ENV LANG=C.UTF-8 \
@@ -28,7 +28,7 @@ RUN apt-get update -y && apt-get upgrade -y && \
     yamllint jq zsh plantuml pandoc ripgrep tmux iputils-ping rsync \
     openjdk-17-jre-headless gridsite-clients zip socat default-mysql-client \
     iproute2 uuid qemu-kvm qemu-system-x86 qemu-utils libvirt-daemon-system \
-    tigervnc-standalone-server lftp unzip && \
+    tigervnc-standalone-server lftp unzip xclip && \
     rm -rf /var/lib/apt/lists/*
 
 # Create dev user
@@ -37,7 +37,7 @@ RUN useradd -ms /bin/bash -u 1000 -G sudo dev && \
 
 # ----------------- CLI Tools ----------------- #
 # Docker CLI
-ENV DOCKER_VERSION=29.2.1
+ENV DOCKER_VERSION=29.9.2
 RUN install -d -m 0755 /etc/apt/keyrings && \
     curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc && \
     chmod a+r /etc/apt/keyrings/docker.asc && \
@@ -46,12 +46,12 @@ RUN install -d -m 0755 /etc/apt/keyrings && \
     docker --version
 
 # Docker Compose
-ENV DOCKER_COMPOSE_VERSION=v5.0.2
+ENV DOCKER_COMPOSE_VERSION=v5.6.1
 RUN curl -fsSL "https://github.com/docker/compose/releases/download/$DOCKER_COMPOSE_VERSION/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && \
     chmod +x /usr/local/bin/docker-compose
 
 # Helm
-ENV HELM_VERSION=4.1.1
+ENV HELM_VERSION=4.3.1
 RUN curl -fsSL "https://get.helm.sh/helm-v$HELM_VERSION-linux-amd64.tar.gz" -o /tmp/helm.tar.gz && \
     tar -xzvf /tmp/helm.tar.gz -C /tmp linux-amd64/helm && \
     mv /tmp/linux-amd64/helm /usr/local/bin/helm && \
@@ -59,44 +59,51 @@ RUN curl -fsSL "https://get.helm.sh/helm-v$HELM_VERSION-linux-amd64.tar.gz" -o /
     rm -rf /tmp/helm.tar.gz /tmp/linux-amd64
 
 # Kubectl
-ENV KUBECTL_VERSION=1.35.0
+ENV KUBECTL_VERSION=1.37.2
 RUN curl -fsSL "https://dl.k8s.io/release/v$KUBECTL_VERSION/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl && \
     chmod +x /usr/local/bin/kubectl
 # K9s
-ENV K9S_VERSION=0.50.18
+ENV K9S_VERSION=0.51.0
 RUN curl -fsSL "https://github.com/derailed/k9s/releases/download/v$K9S_VERSION/k9s_linux_amd64.deb" -o /tmp/k9s.deb && \
     dpkg -i /tmp/k9s.deb && rm /tmp/k9s.deb
 
 # Kind
-ENV KIND_VERSION=0.31.0
+ENV KIND_VERSION=0.33.0
 RUN curl -fsSL "https://github.com/kubernetes-sigs/kind/releases/download/v$KIND_VERSION/kind-linux-amd64" -o /usr/local/bin/kind && chmod +x /usr/local/bin/kind
 
 # AWS CLI v2
-ENV AWS_CLI_VERSION=2.37.9
+ENV AWS_CLI_VERSION=2.39.0
 RUN curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-$AWS_CLI_VERSION.zip" -o awscliv2.zip && \
     unzip awscliv2.zip && ./aws/install && rm -rf aws awscliv2.zip
 
 # AWS Session Manager plugin (needed for `aws ssm start-session`)
-ENV SSM_PLUGIN_VERSION=1.2.835.0
+ENV SSM_PLUGIN_VERSION=1.2.896.0
 RUN curl -fsSL "https://s3.amazonaws.com/session-manager-downloads/plugin/$SSM_PLUGIN_VERSION/ubuntu_64bit/session-manager-plugin.deb" -o /tmp/session-manager-plugin.deb && \
     dpkg -i /tmp/session-manager-plugin.deb && rm /tmp/session-manager-plugin.deb && \
     session-manager-plugin --version
 
 # Terraform
-ENV TERRAFORM_VERSION=1.14.5
+ENV TERRAFORM_VERSION=1.17.0
 RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor -o /etc/apt/keyrings/hashicorp.gpg && \
     chmod a+r /etc/apt/keyrings/hashicorp.gpg && \
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" > /etc/apt/sources.list.d/hashicorp.list && \
     apt-get update && apt-get install -y terraform && \
     rm -rf /var/lib/apt/lists/*
 
+# Mise
+RUN curl -fsSL https://mise.jdx.dev/gpg-key.pub | gpg --dearmor -o /etc/apt/keyrings/mise-archive-keyring.gpg && \
+    chmod a+r /etc/apt/keyrings/mise-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/mise-archive-keyring.gpg] https://mise.jdx.dev/deb stable main" > /etc/apt/sources.list.d/mise.list && \
+    apt-get update && apt-get install -y mise && \
+    rm -rf /var/lib/apt/lists/*
+
 # Trivy
-ENV TRIVY_VERSION=0.69.3
+ENV TRIVY_VERSION=0.76.1
 RUN curl -fsSL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.deb" -o trivy.deb && \
     dpkg -i trivy.deb && rm trivy.deb
 
 # Eksctl
-ENV EKSCTL_VERSION=0.222.0
+ENV EKSCTL_VERSION=0.231.0
 RUN curl -fsSL "https://github.com/weaveworks/eksctl/releases/download/v$EKSCTL_VERSION/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp && \
     mv /tmp/eksctl /usr/local/bin/
 
@@ -108,19 +115,19 @@ RUN curl -fsSL "https://github.com/minio/mc/releases/download/$MC_VERSION/mc.lin
     chmod +x /usr/local/bin/mc
 
 # GLAB
-ENV GLAB_VERSION=1.31.0
-RUN curl -fsSL "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_Linux_x86_64.deb" -o /tmp/glab.deb && \
+ENV GLAB_VERSION=1.125.0
+RUN curl -fsSL "https://gitlab.com/gitlab-org/cli/-/releases/v${GLAB_VERSION}/downloads/glab_${GLAB_VERSION}_linux_amd64.deb" -o /tmp/glab.deb && \
     dpkg -i /tmp/glab.deb && rm /tmp/glab.deb
 
 # Packer
-RUN curl -fsSL https://releases.hashicorp.com/packer/1.11.2/packer_1.11.2_linux_amd64.zip -o packer.zip && \
+RUN curl -fsSL https://releases.hashicorp.com/packer/1.16.2/packer_1.16.2_linux_amd64.zip -o packer.zip && \
     unzip packer.zip && mv packer /usr/bin/packer && chmod +x /usr/bin/packer && rm packer.zip
 
 # OCI CLI
-RUN echo "[global]\nbreak-system-packages = true" > /etc/pip.conf && pip install oci-cli==3.64.1
+RUN echo "[global]\nbreak-system-packages = true" > /etc/pip.conf && pip install oci-cli==3.95.1
 
 # Go
-ENV GO_VERSION=1.26.0
+ENV GO_VERSION=1.27.3
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" -o /tmp/go.tar.gz && \
     tar -C /usr/local -xzf /tmp/go.tar.gz && rm /tmp/go.tar.gz
 
