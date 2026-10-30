@@ -100,6 +100,7 @@ case "$ACTION" in
     $DEV_VOLUME \
     $GPG_SOCKET_MOUNT \
     -v $SSH_AUTH_SOCK:/ssh-agent \
+    -v $HOME/.ssh:/home/dev/.ssh \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v /home/$USER:/home/$USER \
     -v /home/$USER/projects/ptoolz:/home/$USER/projects/ptoolz \
