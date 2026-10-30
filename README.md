@@ -44,7 +44,3 @@ bin/run release <tag>      # build and push latest + <tag>
 ```
 
 `bin/run` uses host networking and mounts the docker socket, `~/.ssh`, the SSH agent, the GPG socket (if present) and `/dev/kvm`. It may call `sudo` to add the kind LB IP to `lo` and to chown `/var/run/docker.sock`.
-
-## Plugins
-
-`plugins/claude/prompt/prompt.py` – sends a single prompt to Claude: `python plugins/claude/prompt/prompt.py "question"` (needs `ANTHROPIC_API_KEY`).
