@@ -4,14 +4,18 @@
 #set -ex
 CMD=$@
 
-if [[ -z "$@" ]]; then
- CMD="/bin/bash"
-fi
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 APP_DIR=$(readlink -f "$DIR/..") # directory of dev_env
 PRJ_DIR=$(readlink -f "$DIR/../") # direcory of the projects
 PRJ_FILE="$PRJ_DIR/config/project.json"
+
+if [[ -z "$@" ]]; then
+ CMD="/bin/bash"
+ if [ -f $PRJ_DIR/me/.bashrc ]; then
+   # Use the project's me/.bashrc for the interactive shell
+   CMD="/bin/bash --rcfile $PRJ_DIR/me/.bashrc"
+ fi
+fi
 
 repo=`jq -r ".docker.repo" "$PRJ_FILE"`
 project=`jq -r ".docker.dev.name" "$PRJ_FILE"`
